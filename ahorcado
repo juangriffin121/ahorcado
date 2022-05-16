@@ -1,0 +1,131 @@
+#!/bin/bash
+len=$(($(wc -l < palabras.txt)+1))
+num=$(($RANDOM*$len/32768+$RANDOM%($len/32768+1)+1))
+PALABRA=$(sed -n ''$num'{p;q}' ./palabras.txt )
+#echo $PALABRA
+largo=${#PALABRA}
+str0=''
+for ((i=0;i<$largo;i++));
+	do
+		letter=${PALABRA:$i:1}
+		str0=$str0'_'
+#		echo $str
+#		echo $letter
+	done
+clear
+echo "AHORCADO"
+
+echo "Tu palabra es:|"$str0"|"
+MISTAKES=0
+error(){
+	MISTAKES=$(($MISTAKES+1))
+}
+
+new_letter(){
+	echo "escribi una letra"
+	read -n 1 -s guesschar
+	echo $guesschar
+	sleep 1
+	new_str=""
+	isin=false
+	for ((i=0;i<$largo;i++));
+		do
+			truechar=${PALABRA:$i:1}
+			oldchar=${str:$i:1}
+			if [[ $guesschar == $truechar ]];then
+				new_str=$new_str$guesschar
+				isin=true
+			else
+				new_str=$new_str$oldchar
+			fi
+		done
+	if $isin;then
+		:
+	else
+		error
+	fi
+	str=$new_str
+}
+
+dibujo(){
+	case $MISTAKES in
+		0) echo "
+	|	___	|
+	|	| |	|
+	|	|	|
+	|	|	|
+	|	|	|
+			";;
+		1) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	|	|
+	|	|	|
+			";;
+		2) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	| []	|
+	|	| 	|
+			";;
+		3) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	|/[]	|
+	|	| 	|
+			";;
+		4) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	|/[]\	|
+	|	| 	|
+			";;
+		5) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	|/[]\	|
+	|	| /	|
+			";;
+		6) echo "
+	|	___	|
+	|	| |	|
+	|	| ()	|
+	|	|/[]\	|
+	|	| /\	|
+			";;
+	esac
+}
+
+hangman(){
+	str=$str0
+	while [[ $MISTAKES -lt 6 ]];
+		do
+			dibujo
+			new_letter
+			if [[ $str != $PALABRA ]];then
+				clear
+				echo "AHORCADO"
+				echo "Tu palabra es:|"$str"|"
+			else
+				clear
+				echo "AHORCADO"
+				echo "Tu palabra es:|"$str"|"
+				echo "ganaste"
+				exit
+			fi
+		done
+	clear
+	echo "AHORCADO"
+	dibujo
+	echo "moriste"
+	echo "Tu palabra era:"$PALABRA
+	exit
+}
+
+hangman
+
